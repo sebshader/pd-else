@@ -31,6 +31,7 @@ sys_gui("\n"
 "array set ::dialog_elsegui::var_circular {} ;\n"
 "\n"
 "array set ::dialog_elsegui::var_n_mode {} ;\n"
+"array set ::dialog_elsegui::var_n_mode_sym {} ;\n"
 "array set ::dialog_elsegui::var_n_size {} ;\n"
 "array set ::dialog_elsegui::var_xpos {} ;\n"
 "array set ::dialog_elsegui::var_ypos {} ;\n"
@@ -46,8 +47,9 @@ sys_gui("\n"
 "array set ::dialog_elsegui::var_colortype {} ;\n" // radio for what color type we're setting
 "\n"
 
+// ------------------------------------------------------------------------------------------------
+        
 // HELPER FUNCTIONS:
-// Clip function
 "proc ::dialog_elsegui::clip {val min {max {}}} {\n"
 "    if {$min ne {} && $val < $min} {return $min}\n"
 "    if {$max ne {} && $val > $max} {return $max}\n"
@@ -86,6 +88,8 @@ sys_gui("\n"
 "}\n"
 "\n"
         
+// ------------------------------------------------------------------------------------------------
+        
 // Get parameters from Pd when asking for properties!
 "proc knob_dialog {id \\\n"
 "         size square \\\n"
@@ -120,6 +124,7 @@ sys_gui("\n"
 "    set ::dialog_elsegui::var_jump($vid) $jump \n"
 "    set ::dialog_elsegui::var_circular($vid) $circular\n"
 "    set ::dialog_elsegui::var_n_mode($vid) $n_mode\n"
+"    set ::dialog_elsegui::var_n_mode_sym($vid) [lindex {Never Always Active Typing} $n_mode]\n"
 "    set ::dialog_elsegui::var_n_size($vid) $n_size\n"
 "    set ::dialog_elsegui::var_xpos($vid) $xpos\n"
 "    set ::dialog_elsegui::var_ypos($vid) $ypos\n"
@@ -145,8 +150,6 @@ sys_gui("\n"
 "    set ::dialog_elsegui::var_snd($vid) [string map {{\\ } \" \"} $snd]\n"
 "    set ::dialog_elsegui::var_prm($vid) [string map {{\\ } \" \"} $prm]\n"
 "    set ::dialog_elsegui::var_var($vid) [string map {{\\ } \" \"} $var]\n"
-"\n"
-//        "    set ::dialog_elsegui::var_n_mode($vid) [lindex {Never Always Active Typing} $n_mode]\n"
 "\n"
 "    set ::dialog_elsegui::var_color_bg($vid) $bcol\n"
 "    set ::dialog_elsegui::var_color_fg($vid) $fcol\n"
@@ -349,13 +352,28 @@ sys_gui("\n"
 "    pack $id.num -side top -fill x\n"
 "    $id.num config -borderwidth 1 -pady 8 -text \"Number settings:\"\n"
         // Number Mode:
-"    frame $id.num.shownum\n"
+
+// Previous way, with an entry box
+//"    frame $id.num.shownum\n"
+//"    label $id.num.shownum.lab -text [_ \"Mode: \"]\n"
+//"    entry $id.num.shownum.ent -textvariable ::dialog_elsegui::var_n_mode($vid) -width 2\n"
+//"    pack $id.num.shownum.ent $id.num.shownum.lab -side right -anchor e\n"
+  
+// Code from [note], justification dropmenu
+/*
+//        "    frame $id.justification\n" // equivale ao id.num geral
+//        "    pack $id.justification -side top\n"
+        "    tk_optionMenu $id.justification.just $var_just Left Center Right\n"
+//        "    label $id.justification.lbj -text \"Justification:\"\n"
+        "    pack $id.justification.oll $id.justification.ol $id.justification.lbj $id.justification.just -side left\n"
+ */
+
+// failed attempt to adapt the above code to [kbob]
+"    tk_optionMenu $id.num.shownum ::dialog_elsegui::var_n_mode_sym($vid) Never Always Active Typing\n"
 "    label $id.num.shownum.lab -text [_ \"Mode: \"]\n"
-"    entry $id.num.shownum.ent -textvariable ::dialog_elsegui::var_n_mode($vid) -width 2\n"
-"    pack $id.num.shownum.ent $id.num.shownum.lab -side right -anchor e\n"
-/*    "    tk_optionMenu $id.num.shownum ::dialog_elsegui::var_n_mode($vid) Never Always Active Typing\n"
-    "    label $id.num.shownum.lab -text [_ \"Mode: \"]\n"
-    "    pack $id.num.shownum.lab $id.num.shownum -side left\n"*/
+"    pack $id.num.shownum $id.num.shownum.lab -side left\n"
+
+
         // Number Size:
 "    frame $id.num.size\n"
 "    label $id.num.size.lab -text [_ \"Size: \"]\n"
@@ -373,8 +391,11 @@ sys_gui("\n"
 "    pack $id.num.ypos.ent $id.num.ypos.lab -side right -anchor w\n"
 "    pack $id.num.shownum $id.num.size -side left -anchor center\n"
 "    pack $id.num.xpos $id.num.ypos -side left -anchor center\n"
+
+        
 "    $id.num config -padx 35\n"
 "\n"
+        
 // Receive/Send/Param/Var entry
 "    labelframe $id.syms -borderwidth 1 -padx 5 -pady 8 -text [_ \"Attached symbols: \"]\n"
 "    pack $id.syms -side top -fill x\n"
@@ -592,7 +613,7 @@ sys_gui("\n"
 // call apply on Return in entry boxes that are in focus & rebind Return to ok button
 "        bind $id.load.load.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
 "        bind $id.arcsettings.arcstart.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
-"        bind $id.num.shownum.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
+//"        bind $id.num.shownum.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
 "        bind $id.num.size.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
 "        bind $id.num.xpos.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
 "        bind $id.num.ypos.ent <KeyPress-Return> \"::dialog_elsegui::bind_enter_to_apply $id\"\n"
@@ -610,7 +631,7 @@ sys_gui("\n"
 // unbind Return from ok button when an entry takes focus
 "        $id.load.load.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
 "        $id.arcsettings.arcstart.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
-"        $id.num.shownum.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
+//"        $id.num.shownum.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
 "        $id.num.size.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
 "        $id.num.xpos.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
 "        $id.num.ypos.ent config -validate focusin -vcmd \"::dialog_elsegui::unbind_return $id\"\n"
